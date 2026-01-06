@@ -4,6 +4,7 @@ const cors = require('cors');
 const fs = require('fs');
 
 const app = express();
+// This uses the port Render gives us, or 3000 if local
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = 'notes.json';
 
@@ -11,11 +12,20 @@ const DATA_FILE = 'notes.json';
 app.use(cors());
 app.use(bodyParser.json());
 
+// --- THIS WAS MISSING ---
+// This tells the server to serve your HTML, CSS, and JS files
+app.use(express.static(__dirname)); 
+// ------------------------
+
 // Helper: Read notes from file
 const getNotes = () => {
     if (!fs.existsSync(DATA_FILE)) return [];
-    const data = fs.readFileSync(DATA_FILE);
-    return JSON.parse(data);
+    try {
+        const data = fs.readFileSync(DATA_FILE);
+        return JSON.parse(data);
+    } catch (e) {
+        return [];
+    }
 };
 
 // Helper: Save notes to file
@@ -40,7 +50,7 @@ app.post('/api/notes', (req, res) => {
     const notes = getNotes();
     
     const newNote = {
-        id: Date.now().toString(), // Simple unique ID
+        id: Date.now().toString(),
         content,
         color: color || '#1e1e24',
         tag: tag || 'General',
@@ -71,5 +81,5 @@ app.post('/api/notes/:id/like', (req, res) => {
 
 // Start Server
 app.listen(PORT, () => {
-    console.log(`ShadowWall Server running at http://localhost:${PORT}`);
+    console.log(`ShadowWall Server running at port ${PORT}`);
 });
