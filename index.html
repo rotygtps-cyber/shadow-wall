@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowWall | Anonymous Notes</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fa-solid fa-ghost"></i> ShadowWall
+            </div>
+            <div class="server-status">
+                <span class="dot"></span> Live Server
+            </div>
+        </header>
+
+        <section class="composer">
+            <div class="composer-card">
+                <h2>Send an Anonymous Note</h2>
+                <textarea id="noteInput" placeholder="Type your confession, rant, or appreciation here..." maxlength="280"></textarea>
+                
+                <div class="composer-tools">
+                    <div class="tool-group">
+                        <label>Color Style:</label>
+                        <div class="color-options">
+                            <div class="color-btn active" data-color="linear-gradient(135deg, #1e1e24, #2a2a35)" style="background: #2a2a35;"></div>
+                            <div class="color-btn" data-color="linear-gradient(135deg, #FF9A9E, #FECFEF)" style="background: #FF9A9E;"></div>
+                            <div class="color-btn" data-color="linear-gradient(135deg, #a18cd1, #fbc2eb)" style="background: #a18cd1;"></div>
+                            <div class="color-btn" data-color="linear-gradient(135deg, #84fab0, #8fd3f4)" style="background: #84fab0;"></div>
+                        </div>
+                    </div>
+
+                    <div class="tool-group">
+                        <label>Tag:</label>
+                        <select id="tagInput">
+                            <option value="General">General</option>
+                            <option value="Confession">Confession</option>
+                            <option value="Rant">Rant</option>
+                            <option value="Appreciation">Appreciation</option>
+                            <option value="Question">Question</option>
+                        </select>
+                    </div>
+
+                    <button id="postBtn" onclick="postNote()">
+                        Post Anonymously <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <hr class="divider">
+
+        <section class="feed">
+            <div class="feed-header">
+                <h3>Recent Notes</h3>
+                <button class="refresh-btn" onclick="fetchNotes()">
+                    <i class="fa-solid fa-rotate-right"></i> Refresh
+                </button>
+            </div>
+            
+            <div id="notesGrid" class="notes-grid">
+                <div class="loader">Loading notes...</div>
+            </div>
+        </section>
+    </div>
+
+    <script src="client.js"></script>
+</body>
+</html>
