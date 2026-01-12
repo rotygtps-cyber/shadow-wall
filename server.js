@@ -4,12 +4,13 @@ const cors = require('cors');
 const fs = require('fs');
 
 const app = express();
+// Uses Render port or default 3000
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = 'notes.json';
 
-// --- PASTE YOUR DISCORD WEBHOOK URL HERE ---
+// --- PASTE YOUR WEBHOOK URL HERE ---
 const DISCORD_WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1460279813418913792/rKIJjmyMcSl_JYePIASlzAPUdq2mFwk2NLkfioP4bsVua6ImduN1Ojmfw15ZYFqe93Ne'; 
-// -------------------------------------------
+// -----------------------------------
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -29,26 +30,45 @@ const saveNotes = (notes) => {
     fs.writeFileSync(DATA_FILE, JSON.stringify(notes, null, 2));
 };
 
-// Helper: Send to Discord
+// --- NEW PROFESSIONAL DISCORD DESIGN ---
 async function sendToDiscord(note) {
     if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.includes('PASTE_YOUR')) return;
 
-    // Convert CSS gradient colors to a single Hex integer for Discord Embed
-    // Defaulting to Pink/Red if unknown
-    let hexColor = 16711765; // #FF0055
-    if (note.color.includes('#00C9FF')) hexColor = 51695; // Blue
-    if (note.color.includes('#FDBB2D')) hexColor = 16628525; // Gold
-    if (note.color.includes('#182848')) hexColor = 1584200; // Dark Blue
+    // 1. MATCH COLORS EXACTLY
+    // We convert your CSS gradient colors to Discord "Decimal" colors
+    let discordColor = 16711765; // Default Neon Pink (#FF0055)
+    
+    if (note.color.includes('#00C9FF')) discordColor = 51695;    // Neon Blue
+    if (note.color.includes('#FDBB2D')) discordColor = 16628525; // Gold
+    if (note.color.includes('#182848')) discordColor = 1584200;  // Midnight Blue
+
+    // 2. CHOOSE AN ICON BASED ON TAG
+    let emoji = "📢";
+    if (note.tag === "Chika") emoji = "🍵";
+    if (note.tag === "Love Letter") emoji = "💌";
+    if (note.tag === "Rant") emoji = "😤";
+    if (note.tag === "Meme") emoji = "🤡";
 
     const payload = {
-        username: "TambayLand Wall",
-        avatar_url: "https://cdn-icons-png.flaticon.com/512/2665/2665448.png", // Generic Ghost Icon
+        username: "TambayLand Support",
+        avatar_url: "https://media.discordapp.net/attachments/1455269199764258889/1460285829753868398/logotambay.png?ex=69665ca8&is=69650b28&hm=5c11db2bf64d44644180d4ee41c39a6cc5c1572635bf18c2fe1bb05a59a3c1ad&=&format=webp&quality=lossless&width=646&height=656",
         embeds: [{
-            title: `New ${note.tag}! 📢`,
-            description: note.content,
-            color: hexColor,
+            // The colored side bar
+            color: discordColor,
+            
+            // The "Header" (Tag Name)
+            author: {
+                name: `${emoji}  ${note.tag.toUpperCase()}`,
+            },
+            
+            // The "Body" (Big bold text)
+            // We use ``` blocks or # headers to make it stand out
+            description: `### "${note.content}"`,
+            
+            // The "Footer" (Timestamp)
             footer: {
-                text: "Sent from TambayLand Confession Wall"
+                text: "Sent via TambayLand Confession Wall",
+                icon_url: "[https://cdn-icons-png.flaticon.com/512/1077/1077035.png](https://cdn-icons-png.flaticon.com/512/1077/1077035.png)" // Small Heart Icon
             },
             timestamp: new Date().toISOString()
         }]
@@ -90,9 +110,8 @@ app.post('/api/notes', (req, res) => {
     notes.push(newNote);
     saveNotes(notes);
     
-    // --- SEND TO DISCORD HERE ---
+    // Send the new design
     sendToDiscord(newNote); 
-    // ----------------------------
 
     res.status(201).json(newNote);
 });
