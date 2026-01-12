@@ -51,7 +51,7 @@ async function sendToDiscord(note) {
 
     const payload = {
         username: "TambayLand Support",
-        avatar_url: "https://media.discordapp.net/attachments/1455269199764258889/1460285829753868398/logotambay.png",
+        avatar_url: "https://github.com/rotygtps-cyber/shadow-wall/blob/main/logotambay.png?raw=true",
         embeds: [{
             color: discordColor,
             author: {
@@ -158,3 +158,4 @@ app.post('/api/notes/:id/comments', (req, res) => {
 app.listen(PORT, () => {
     console.log(`TambayLand Server running at port ${PORT}`);
 });
+
