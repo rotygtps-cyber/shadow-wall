@@ -4,13 +4,12 @@ const cors = require('cors');
 const fs = require('fs');
 
 const app = express();
-// Uses Render port or default 3000
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = 'notes.json';
 
-// --- PASTE YOUR WEBHOOK URL HERE ---
+// --- PASTE YOUR NEW WEBHOOK URL HERE ---
 const DISCORD_WEBHOOK_URL = 'https://discordapp.com/api/webhooks/1460279813418913792/rKIJjmyMcSl_JYePIASlzAPUdq2mFwk2NLkfioP4bsVua6ImduN1Ojmfw15ZYFqe93Ne'; 
-// -----------------------------------
+// ---------------------------------------
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -30,19 +29,20 @@ const saveNotes = (notes) => {
     fs.writeFileSync(DATA_FILE, JSON.stringify(notes, null, 2));
 };
 
-// --- NEW PROFESSIONAL DISCORD DESIGN ---
 async function sendToDiscord(note) {
-    if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.includes('PASTE_YOUR')) return;
+    // Check if URL is valid
+    if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.includes('PASTE_NEW')) {
+        console.error("Discord Webhook URL is missing!");
+        return;
+    }
 
-    // 1. MATCH COLORS EXACTLY
-    // We convert your CSS gradient colors to Discord "Decimal" colors
-    let discordColor = 16711765; // Default Neon Pink (#FF0055)
-    
-    if (note.color.includes('#00C9FF')) discordColor = 51695;    // Neon Blue
+    // 1. MATCH COLORS
+    let discordColor = 16711765; // Default Pink
+    if (note.color.includes('#00C9FF')) discordColor = 51695;    // Blue
     if (note.color.includes('#FDBB2D')) discordColor = 16628525; // Gold
-    if (note.color.includes('#182848')) discordColor = 1584200;  // Midnight Blue
+    if (note.color.includes('#182848')) discordColor = 1584200;  // Midnight
 
-    // 2. CHOOSE AN ICON BASED ON TAG
+    // 2. CHOOSE ICON
     let emoji = "📢";
     if (note.tag === "Chika") emoji = "🍵";
     if (note.tag === "Love Letter") emoji = "💌";
@@ -51,37 +51,38 @@ async function sendToDiscord(note) {
 
     const payload = {
         username: "TambayLand Support",
-        avatar_url: "https://media.discordapp.net/attachments/1455269199764258889/1460285829753868398/logotambay.png?ex=69665ca8&is=69650b28&hm=5c11db2bf64d44644180d4ee41c39a6cc5c1572635bf18c2fe1bb05a59a3c1ad&=&format=webp&quality=lossless&width=646&height=656",
+        avatar_url: "https://media.discordapp.net/attachments/1455269199764258889/1460285829753868398/logotambay.png",
         embeds: [{
-            // The colored side bar
             color: discordColor,
-            
-            // The "Header" (Tag Name)
             author: {
                 name: `${emoji}  ${note.tag.toUpperCase()}`,
             },
-            
-            // The "Body" (Big bold text)
-            // We use ``` blocks or # headers to make it stand out
             description: `### "${note.content}"`,
-            
-            // The "Footer" (Timestamp)
             footer: {
                 text: "Sent via TambayLand Confession Wall",
-                icon_url: "[https://cdn-icons-png.flaticon.com/512/1077/1077035.png](https://cdn-icons-png.flaticon.com/512/1077/1077035.png)" // Small Heart Icon
+                // FIXED LINE BELOW (Removed the [] brackets):
+                icon_url: "https://cdn-icons-png.flaticon.com/512/1077/1077035.png"
             },
             timestamp: new Date().toISOString()
         }]
     };
 
     try {
-        await fetch(DISCORD_WEBHOOK_URL, {
+        const response = await fetch(DISCORD_WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
+        
+        // Log the result to Render logs so you can see if it worked
+        if (response.ok) {
+            console.log("✅ Message sent to Discord successfully!");
+        } else {
+            console.error("❌ Discord Error:", await response.text());
+        }
+
     } catch (err) {
-        console.error("Failed to send to Discord:", err);
+        console.error("❌ Failed to send to Discord:", err);
     }
 }
 
@@ -110,7 +111,7 @@ app.post('/api/notes', (req, res) => {
     notes.push(newNote);
     saveNotes(notes);
     
-    // Send the new design
+    // Send to Discord
     sendToDiscord(newNote); 
 
     res.status(201).json(newNote);
